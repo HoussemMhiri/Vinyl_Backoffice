@@ -9,6 +9,18 @@ const routes: Core.RouterConfig = {
       handler: 'api::sellable-unit.sellable-unit.checkDiscogsCompleteness',
       config: { auth: false, policies: [], middlewares: [] },
     },
+    {
+      method: 'POST',
+      path: '/sellable-units/:id/publish-discogs',
+      handler: 'api::sellable-unit.sellable-unit.publishDiscogs',
+      config: { auth: false, policies: [], middlewares: [] },
+    },
+    {
+      method: 'POST',
+      path: '/sellable-units/:id/simulate-discogs-sale',
+      handler: 'api::sellable-unit.sellable-unit.simulateDiscogsSale',
+      config: { auth: false, policies: [], middlewares: [] },
+    },
   ],
 };
 
