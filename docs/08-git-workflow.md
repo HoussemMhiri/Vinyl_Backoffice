@@ -37,10 +37,3 @@ Prefixes: `feat/` for scope, `chore/` for tooling and config, `fix/` for correct
 `.env` · `node_modules/` · `.tmp/` · `build/` · `dist/` · `.strapi/` · any database dump.
 
 Enforced by `.gitignore` at the repo root.
-
-## Secret incident (resolved)
-
-The initial scaffold commit tracked `backoffice/.env` and was pushed. All six Strapi
-secrets were rotated, the file was untracked, and `main` history was rewritten so no
-`.env` exists in any reachable commit. Kept here as a record — a reviewer seeing a
-force-push in the reflog should know why it happened.
