@@ -11,6 +11,8 @@ work from. The original spec remains the source of truth.
 | [03-api-and-workflow.md](03-api-and-workflow.md) | writing routes/controllers/services, or the README parcours |
 | [06-research-notes.md](06-research-notes.md) | you need the verified Strapi 5 / Discogs API contracts and the decisions they force |
 | [phase-1-bootstrap.md](phase-1-bootstrap.md) | executing Phase 1 |
+| [09-architecture.md](09-architecture.md) | deciding where a file goes, or naming anything |
+| [08-git-workflow.md](08-git-workflow.md) | branching, commits, PRs |
 | [04-build-plan.md](04-build-plan.md) | deciding what to do next, or what to cut |
 | [05-acceptance-checklist.md](05-acceptance-checklist.md) | before declaring anything done |
 

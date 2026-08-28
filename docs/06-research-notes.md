@@ -20,6 +20,12 @@ Installed version: **5.52.2**, TypeScript.
   Business entities have no editorial draft state, and D&P doubles every row into
   draft/published versions, which would badly complicate SKU uniqueness and listings.
 
+### Reserved attribute names
+`status` is reserved: the Content Manager uses it for document draft/published state.
+An attribute named `status` is rejected by the admin API with "Invalid status" while the
+Document Service still accepts it — so it looks like it works from scripts and fails only
+in the UI. Business statuses are therefore `saleStatus`, `listingStatus`, `eventStatus`.
+
 ### Lifecycles (SKU generation)
 - Path: `src/api/<api>/content-types/<ct>/lifecycles.ts`
 - `beforeCreate(event)` → mutate `event.params.data` directly.
@@ -133,6 +139,7 @@ Consequence:
 | 5 | Media and sleeve condition enums differ; connector maps slug → Discogs string |
 | 6 | `sku` is sent as Discogs `external_id` |
 | 7 | Real mode sends `Authorization: Discogs token=` + a custom `User-Agent` |
+| 8 | No attribute may be named `status` — reserved by Strapi 5 |
 
 ## Sources
 

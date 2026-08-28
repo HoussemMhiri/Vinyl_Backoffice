@@ -1,0 +1,66 @@
+{
+  "kind": "collectionType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "Product",
+    "description": "Vinyl catalogue sheet, independent of any physical copy"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "tenant": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::tenant.tenant",
+      "inversedBy": "products",
+      "required": true
+    },
+    "productType": {
+      "type": "enumeration",
+      "enum": ["vinyl"],
+      "default": "vinyl",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "artist": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "label": {
+      "type": "string"
+    },
+    "year": {
+      "type": "integer"
+    },
+    "country": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "discogsReleaseId": {
+      "type": "string"
+    },
+    "discogsMasterId": {
+      "type": "string"
+    },
+    "sellableUnits": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sellable-unit.sellable-unit",
+      "mappedBy": "product"
+    }
+  }
+}
