@@ -69,6 +69,12 @@
     },
     "internalLocation": {
       "type": "string"
+    },
+    "channelListings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::channel-listing.channel-listing",
+      "mappedBy": "sellableUnit"
     }
   }
 }
