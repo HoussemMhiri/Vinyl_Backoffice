@@ -48,3 +48,13 @@ describe('nextSequence', () => {
     expect(nextSequence(41)).toBe(42);
   });
 });
+
+describe('supplied SKUs', () => {
+  it('a supplied SKU in our format yields a sequence the counter can continue from', () => {
+    expect(parseSkuSequence('VIN-000007')).toBe(7);
+  });
+
+  it('a foreign SKU yields no sequence, so it cannot corrupt the counter', () => {
+    expect(parseSkuSequence('IMPORTED-001')).toBeNull();
+  });
+});

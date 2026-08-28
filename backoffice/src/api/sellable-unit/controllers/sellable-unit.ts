@@ -2,6 +2,7 @@ import { factories } from '@strapi/strapi';
 import type { Context } from 'koa';
 import {
   ConnectorError,
+  InsufficientStockError,
   ListingValidationError,
   NotPublishedError,
   UnitNotFoundError,
@@ -16,6 +17,7 @@ function toHttpError(ctx: Context, error: unknown) {
     error instanceof TenantError ||
     error instanceof UnitNotFoundError ||
     error instanceof NotPublishedError ||
+    error instanceof InsufficientStockError ||
     error instanceof ConnectorError
   ) {
     return ctx.throw(error.httpStatus, error.message);

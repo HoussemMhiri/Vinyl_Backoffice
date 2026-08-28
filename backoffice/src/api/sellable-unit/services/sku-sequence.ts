@@ -1,4 +1,4 @@
-import { formatSku, nextSequence } from '../../../domain/sku';
+import { formatSku, nextSequence, parseSkuSequence } from '../../../domain/sku';
 
 const UNIT_UID = 'api::sellable-unit.sellable-unit';
 
@@ -64,6 +64,8 @@ async function highestSequenceForTenant(tenant: TenantRef): Promise<number | nul
 
 export async function assignSku(data: Record<string, unknown>): Promise<void> {
   if (typeof data.sku === 'string' && data.sku.length > 0) {
+    // A supplied SKU still has to advance the counter, or the next generated one collides
+    data.skuSequence = parseSkuSequence(data.sku) ?? undefined;
     return;
   }
 

@@ -60,7 +60,7 @@ export class DiscogsHttpConnector implements MarketplaceConnector {
     private readonly userAgent: string
   ) {}
 
-  private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  private async request<T>(path: string, init: RequestInit = {}): Promise<T | null> {
     const response = await fetch(`${API_BASE}${path}`, {
       ...init,
       headers: {
@@ -70,6 +70,12 @@ export class DiscogsHttpConnector implements MarketplaceConnector {
         ...init.headers,
       },
     });
+
+    // A 404 is an answer, not a failure: the mock returns null for an unknown release
+    // and both connectors must behave the same way.
+    if (response.status === 404) {
+      return null;
+    }
 
     if (!response.ok) {
       throw new Error(`Discogs ${init.method ?? 'GET'} ${path} failed: ${response.status}`);
@@ -84,7 +90,7 @@ export class DiscogsHttpConnector implements MarketplaceConnector {
       `/database/search?${params}`
     );
 
-    return body.results.map(toSearchResult);
+    return body ? body.results.map(toSearchResult) : [];
   }
 
   async getRelease(releaseId: string): Promise<DiscogsRelease | null> {
@@ -99,6 +105,10 @@ export class DiscogsHttpConnector implements MarketplaceConnector {
       artists?: { name: string }[];
       genres?: string[];
     }>(`/releases/${releaseId}`);
+
+    if (!body) {
+      return null;
+    }
 
     return {
       releaseId: String(body.id),
@@ -139,6 +149,10 @@ export class DiscogsHttpConnector implements MarketplaceConnector {
       '/marketplace/listings',
       { method: 'POST', body: JSON.stringify(payload) }
     );
+
+    if (!listing) {
+      throw new Error('Discogs rejected the listing: release not found');
+    }
 
     const externalListingId = String(listing.listing_id);
 

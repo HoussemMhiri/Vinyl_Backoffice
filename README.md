@@ -164,9 +164,18 @@ Deliberate limits, given the 8-hour scope:
 
 - **No authentication on the custom routes.** They are `auth: false`. A real deployment
   would put an API token or a policy in front of them.
+- **SKUs are unique per tenant, not globally.** Each tenant's sequence restarts at
+  `VIN-000001`, so two tenants legitimately hold the same SKU. No database constraint
+  enforces even the per-tenant uniqueness: Strapi does not translate a `unique` attribute
+  into an index here, and a global unique index would break the per-tenant sequence
+  outright. Enforcing it properly needs a composite index on (tenant, sku), which in turn
+  needs the tenant denormalised onto the row.
 - **The SKU sequence is racy under concurrent creation.** Two simultaneous inserts can
-  read the same highest sequence. The `sku` column is unique, so the loser fails loudly
-  rather than silently duplicating. Production would use a Postgres sequence per tenant.
+  read the same highest sequence and, with no constraint behind them, both succeed.
+  Production would use a Postgres sequence per tenant.
+- **`upsertListing` is a non-atomic find-then-create.** Concurrent publishes of the same
+  unit can create two listings. Single-user usage never hits it; a real system needs the
+  composite unique index above and an upsert on conflict.
 - **No retry or rate limiting on the Discogs HTTP connector.** Discogs limits requests
   per minute; a real integration needs backoff.
 - **Sales are simulated locally.** Discogs closed its public marketplace-search endpoint,

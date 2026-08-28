@@ -62,6 +62,10 @@ export class NotPublishedError extends Error {
   readonly httpStatus = 409;
 }
 
+export class InsufficientStockError extends Error {
+  readonly httpStatus = 409;
+}
+
 export async function publishToDiscogs(tenantId: string, unitId: string) {
   const unit = await loadUnit(tenantId, unitId);
   const connector = getDiscogsConnector();
@@ -138,6 +142,13 @@ export async function simulateDiscogsSale(tenantId: string, unitId: string, quan
 
   if (!listing || listing.listingStatus !== 'published') {
     throw new NotPublishedError(`${unit.sku} is not published on discogs`);
+  }
+
+  // Clamping an oversell would silently report a sale larger than the stock we held
+  if (quantity > (unit.quantity ?? 0)) {
+    throw new InsufficientStockError(
+      `${unit.sku} has ${unit.quantity ?? 0} in stock, cannot sell ${quantity}`
+    );
   }
 
   const stock = getDiscogsConnector().markLocalSoldOrOutOfStock(unit, quantity);
