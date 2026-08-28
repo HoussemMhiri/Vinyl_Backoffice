@@ -14,7 +14,7 @@
 | 8 | Create/update the ChannelListing | (same call as 7) | listing `published` + `externalListingId` + `externalUrl` |
 | 9 | Events journalised | automatic | rows in `marketplace-sync-event` |
 | 10 | Simulate a Discogs sale | `POST /api/sellable-units/:id/simulate-discogs-sale` | — |
-| 11 | Unit → `sold` / `out_of_stock` | (same call as 10) | unit status + quantity updated |
+| 11 | Unit → `sold` / `out_of_stock` | (same call as 10) | unit `saleStatus` + quantity updated |
 | 12 | Journalise the out-of-stock | (same call as 10) | event `mark_local_out_of_stock` |
 
 Endpoint names may differ from the spec's suggestions — but the parcours must be clear
@@ -51,7 +51,7 @@ Logs `publish_listing`.
 ### `POST /api/sellable-units/:id/simulate-discogs-sale`
 body `{ tenantId, quantity? }` (default 1)
 → decrements quantity; unit becomes `sold` when it hits 0 (or `out_of_stock` per your
-documented rule); listing status → `removed`; logs `mark_local_out_of_stock`.
+documented rule); listing `listingStatus` → `removed`; logs `mark_local_out_of_stock`.
 → `200 { unit, listing }`
 
 ## Layering rule

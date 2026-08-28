@@ -56,9 +56,14 @@ Describes the *release*, not a physical copy. Several units can point to one pro
 | `mediaCondition` | enum | disc condition, Discogs grading |
 | `sleeveCondition` | enum | sleeve condition, Discogs grading |
 | `sellerComment` | text | optional |
-| `status` | enum | `available` \| `reserved` \| `sold` \| `out_of_stock` \| `archived`, default `available` |
+| `saleStatus` | enum | `available` \| `reserved` \| `sold` \| `out_of_stock` \| `archived`, default `available` |
 | `quantity` | integer | default `1` |
 | `internalLocation` | string | optional |
+
+> **Reserved name.** `status` is reserved by Strapi 5 (the Content Manager uses it for
+> document draft/published state), so every business status is prefixed: `saleStatus`,
+> `listingStatus`, `eventStatus`. Using `status` fails in the admin panel with
+> "Invalid status" while still working through the Document Service.
 
 **SKU rule:** never user-input. Generated in a `beforeCreate` lifecycle (or a dedicated
 service) as `VIN-` + a zero-padded 6-digit counter. Sequence is per tenant. Must be
@@ -83,7 +88,7 @@ The two lists differ on purpose — Discogs accepts three extra sleeve values.
 | `channel` | enum | `discogs` only for now |
 | `externalListingId` | string | filled after publish |
 | `externalUrl` | string | filled after publish |
-| `status` | enum | `not_published` \| `pending` \| `published` \| `failed` \| `removed` \| `sync_error`, default `not_published` |
+| `listingStatus` | enum | `not_published` \| `pending` \| `published` \| `failed` \| `removed` \| `sync_error`, default `not_published` |
 | `publishedPrice` | decimal | price actually sent to the channel |
 | `lastSyncedAt` | datetime | |
 | `lastErrorMessage` | text | |
@@ -101,7 +106,7 @@ Append-only. One row per marketplace operation attempt, success or failure.
 | `tenant` | relation → tenant | required |
 | `channel` | enum | `discogs` |
 | `action` | enum | see below |
-| `status` | enum | `success` \| `error` (add `skipped` if useful) |
+| `eventStatus` | enum | `success` \| `error` (add `skipped` if useful) |
 | `product` | relation → product | optional |
 | `sellableUnit` | relation → sellable-unit | optional |
 | `channelListing` | relation → channel-listing | optional |

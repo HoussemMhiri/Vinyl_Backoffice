@@ -55,7 +55,7 @@
     "sellerComment": {
       "type": "text"
     },
-    "status": {
+    "saleStatus": {
       "type": "enumeration",
       "enum": ["available", "reserved", "sold", "out_of_stock", "archived"],
       "default": "available",
