@@ -63,11 +63,116 @@ Strapi starts on http://localhost:1337 — create the first admin user at `/admi
 
 ## Seed
 
-<!-- phase 7 -->
+```bash
+npm run seed
+```
+
+Creates the tenant `Vinyl Store Paris`, the Daft Punk / *Discovery* catalogue sheet and
+one sellable unit, then prints the ids the parcours below needs. The script is
+idempotent: running it twice reuses the existing records.
+
+The product is deliberately created **without** a `discogsReleaseId` — attaching one is
+step 4 of the parcours.
 
 ## Test parcours
 
-<!-- phase 7: the 12 steps, as runnable requests -->
+Discogs runs in mock mode, so no token and no network access are required.
+
+Export the ids printed by the seed:
+
+```bash
+TENANT=<TENANT_ID>
+PRODUCT=<PRODUCT_ID>
+UNIT=<UNIT_ID>
+```
+
+**1-2. Tenant and catalogue sheet** — created by the seed, visible in the admin panel.
+
+**3. Search a Discogs release**
+
+```bash
+curl "http://localhost:1337/api/discogs/search?tenantId=$TENANT&q=daft%20punk%20discovery"
+```
+
+**4. Attach the release to the product**
+
+```bash
+curl -X POST "http://localhost:1337/api/products/$PRODUCT/attach-discogs-release"   -H "Content-Type: application/json"   -d "{\"tenantId\":\"$TENANT\",\"releaseId\":\"123456\"}"
+```
+
+Only empty product fields are filled from the release: the seller's own metadata is never
+overwritten.
+
+**5. Sellable unit** — created by the seed with an automatic SKU (`VIN-000001`). Create
+more from the admin panel; the SKU is always generated server-side, per tenant.
+
+**6. Check Discogs completeness**
+
+```bash
+curl -X POST "http://localhost:1337/api/sellable-units/$UNIT/check-discogs-completeness"   -H "Content-Type: application/json" -d "{\"tenantId\":\"$TENANT\"}"
+```
+
+Returns `200` with `{ isValid, missingFields, errors }`. An incomplete unit is a valid
+answer, not an error. Run this **before** step 4 to see it fail on
+`product.discogsReleaseId`.
+
+**7-9. Publish on Discogs**
+
+```bash
+curl -X POST "http://localhost:1337/api/sellable-units/$UNIT/publish-discogs"   -H "Content-Type: application/json" -d "{\"tenantId\":\"$TENANT\"}"
+```
+
+Creates or updates the `ChannelListing` with `externalListingId`, `externalUrl`,
+`publishedPrice` and `lastSyncedAt`, and journalises `publish_listing`. Publishing twice
+updates the same listing rather than creating a second one. An incomplete unit returns
+`422` with the missing fields and leaves the listing in `failed`.
+
+**10-12. Simulate a Discogs sale**
+
+```bash
+curl -X POST "http://localhost:1337/api/sellable-units/$UNIT/simulate-discogs-sale"   -H "Content-Type: application/json"   -d "{\"tenantId\":\"$TENANT\",\"quantity\":1}"
+```
+
+Decrements the stock. The unit becomes `sold` when it reaches zero and the listing is set
+to `removed`; with stock left it stays `available`. Journalises
+`mark_local_out_of_stock`.
+
+**Check the journal** — open **Marketplace Sync Event** in the admin panel: every
+operation above wrote exactly one row, successes and failures alike.
+
+## Multi-tenancy
+
+Every business query is scoped by tenant. A record belonging to another tenant returns
+`404`, never `403`, so the existence of another tenant's data is never confirmed. An
+inactive tenant is refused with `403`.
+
+## Tests
+
+```bash
+npm test              # unit, no database required
+npm run test:integration   # against PostgreSQL, isolates its own tenant
+```
+
+Unit tests cover SKU generation, completeness validation, the Discogs condition mapping
+and the mock connector. Business rules live in `src/domain` as pure functions
+specifically so they can be tested without a Strapi harness — Strapi's own testing guide
+relies on in-memory SQLite, which it states does not work on Windows.
+
+## Known gaps
+
+Deliberate limits, given the 8-hour scope:
+
+- **No authentication on the custom routes.** They are `auth: false`. A real deployment
+  would put an API token or a policy in front of them.
+- **The SKU sequence is racy under concurrent creation.** Two simultaneous inserts can
+  read the same highest sequence. The `sku` column is unique, so the loser fails loudly
+  rather than silently duplicating. Production would use a Postgres sequence per tenant.
+- **No retry or rate limiting on the Discogs HTTP connector.** Discogs limits requests
+  per minute; a real integration needs backoff.
+- **Sales are simulated locally.** Discogs closed its public marketplace-search endpoint,
+  so there is no supported way to poll for real sales.
+- **The real API mode is untested against live Discogs**, having no token. It is written
+  to the documented contract and isolated behind the same interface as the mock.
 
 ## Project structure
 
