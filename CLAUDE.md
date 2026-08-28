@@ -9,13 +9,18 @@ Full spec: `test-technique.md`. Working decomposition: `docs/`.
 - `docs/01-data-model.md` — the five content-types
 - `docs/06-research-notes.md` — verified Strapi 5 / Discogs contracts
 - `docs/07-engineering-conventions.md` — how the code must be written
+- `docs/09-architecture.md` — folder structure, layer boundaries, naming
 
 ## Non-negotiables
 
 - Comments only where they add information the code cannot. No restating code, no
   section banners, no step-by-step narration. See conventions.
-- Layering: route → controller → service → connector. Controllers hold no business
-  logic; services never touch `ctx`; the connector never touches the DB.
+- Layering: `api/` → `connectors/` → `domain/`, dependencies inward only. `domain/`
+  imports nothing — no strapi, no io. Nothing imports `api/`.
+- Controllers hold no business logic; services never touch `ctx`; the connector never
+  touches the DB; `sync-event` is the only writer of log rows.
+- Structure and naming follow `docs/09-architecture.md`. New file in the wrong layer is
+  a blocker, not a nit.
 - Every business query is scoped by tenant.
 - Pure logic (SKU, completeness, condition mapping) stays framework-free and unit-tested.
 - No secrets in tracked files; mock mode is the default and needs no token.
