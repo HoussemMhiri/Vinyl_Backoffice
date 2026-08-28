@@ -20,7 +20,7 @@ tables live in the `vinyl_backoffice` Postgres database (not SQLite).
 
 ### 1.1 — Create the database and role
 - [ ] create role `vinyl` and database `vinyl_backoffice` in Postgres
-- [ ] **you run it** (needs the `postgres` superuser password, keeps it out of the transcript)
+- [ ] run manually: it needs the `postgres` superuser password, which stays off the record
 - [ ] verify: connecting as `vinyl` to `vinyl_backoffice` succeeds
 
 ### 1.2 — Point Strapi at Postgres
